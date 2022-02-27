@@ -114,7 +114,6 @@ Once you understand the code, run `python api/create_table.py` to create the tab
 
 Note how you can create a table both programatically, and with the `psql` CLI. For your project, determine what's best, and implement your solution accordingly. 
 
-
 #### Creating a Flask API to read and write to our new table
 
 Now that we have our table, let's create the API that will handle read and write operations. 
@@ -124,9 +123,23 @@ We'll create two routes for our API:
  - `/insert`: This will insert a new entry into the table.
 
 In the `api/api.py` file, you will see how Flask handles these routes, and how we gather information from the 
-database with these routes. 
+database with these routes. Refer to this file and make sure that you understand the code.
 
 TODO: Continue from here.
+
+### Creating our React Native app
+
+Create your React Native app by running:
+```bash
+expo init <YOUR_APP_NAME> --npm
+```
+
+For the purposes of this project, we'll use the name **Blurble**. Expo will create a directory called `Blurble` in your current directory with all the necessary packages.
+
+Run `npm start` to start your development server. You can test your app on iOS and Android with the Expo Go app, or you can run the simulators by following the instructions on the server window.
+
+## Linking the the API and the React Native app
+
 
 ### NOTES
 
