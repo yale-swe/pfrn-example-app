@@ -1,0 +1,4 @@
+# Ignoring the virutal environment folder
+# in @seunomonije's implementation. Adjust
+# this to fit your virtual environment file. 
+env/
