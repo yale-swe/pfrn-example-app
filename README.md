@@ -229,9 +229,9 @@ Once you understand the code, run your React Native dev server with `npm start`,
 
 By now, you should have a working React Native app that can post to the API and store the Blurbles in your database.
 
-It's a good idea to write some tests for your app
+It's a good idea to write some tests for your app. You should probably test your API, and your frontend. 
 
-
+When working in a team setting, Continuous Integration (CI) is a great way to test your app.
 
 ## Appendix/Helpful Notes
 
