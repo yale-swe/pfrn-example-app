@@ -1,4 +1,4 @@
-# Yale SWE PFRN Example App (Incomplete)
+# Yale SWE PFRN Example App
 
 The PFRN stack consists of the following popular frameworks:
   - [PostgreSQL](https://www.postgresql.org/), a popular relational database
