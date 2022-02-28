@@ -1,47 +1,129 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { StatusBar } from 'expo-status-bar';
 import { 
   StyleSheet, 
   Text,
   View, 
-  TextInput, 
+  Button,
   Dimensions, 
-  ScrollView 
+  ScrollView,
 } from 'react-native';
+import { Card, Input } from 'react-native-elements';
+
+interface Blurble {
+  id: number;
+  title: string;
+  content: string;
+  datetime: string;
+}
+
+/**
+ * Get the width and height of the device screen 
+ * and make available globally.
+ */
+const DEVICE_WIDTH = Dimensions.get('window').width;
+const DEVICE_HEIGHT = Dimensions.get('window').height;
+
+const HOST_ADDR: string = 'http://localhost:5000/';
+
 
 export default function App() {
-  const [title, setTitle] = React.useState('')
-  const [content, setContent] = React.useState('')
+  const [title, setTitle] = useState('')
+  const [content, setContent] = useState('')
+  const [blurbles, setBlurbles] = useState<Blurble[]>([]);
+
+  /**
+   * Sends a Blurble to the API, which stores it in the 
+   * database. After we've successfully stored the Blurble,
+   * fetch all Blurbles from the database to update
+   * our state.
+   * @returns void
+   * @throws {Error} Error if the API call fails
+   */
+  const sendBlurble = async () => {
+    try {
+      const response = await fetch(HOST_ADDR + 'insert', {
+        method: 'POST',
+        headers: {
+          // Note the CORS wildcard here.
+          'Access-Control-Allow-Origin': '*',
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          title: title,
+          content: content,
+        }),
+      });
+    } catch (error) {
+      console.error(error);
+    } finally {
+      await getBlurbles();
+    }
+  }
+
+  /**
+   * Asynchronously fetches a blurble from the API
+   * at the designated endpoint.
+   * @returns {object} A json object containing a list of Blurbles
+   * @throws {Error} If the request fails
+   */
+  const getBlurbles = async () => {
+    try {
+        // CORS is disabled for development purposes,
+        // however set your needs accordingly for production.
+        const response = await fetch(`${HOST_ADDR}`);
+        const json = await response.json();
+        setBlurbles(json);
+    } catch (error) {
+        console.error(error);
+    } finally {
+      return blurbles;
+    }
+  };
+
+  useEffect(() => {
+    getBlurbles();
+  }, []);
 
   return (
     <View style={styles.container}>
       <View style={styles.inputView}>
-        <TextInput
+        <Input
           style={styles.titleInput}
-          placeholder="Title"
+          label="Title"
+          labelStyle={styles.titleLabel}
+          placeholder="What a day..."
           onChangeText={(newTitle: React.SetStateAction<string>) => setTitle(newTitle)}
           defaultValue={title}
         />
 
-        <TextInput
+        <Input
           style={styles.contentInput}
-          placeholder="Blurb"
+          label="Blurble"
+          labelStyle={styles.contentLabel}
+          placeholder="First I woke up, then I ate, then..."
           onChangeText={(newContent: React.SetStateAction<string>) => setContent(newContent)}
           defaultValue={content}
+        />
+
+        <Button
+          onPress={sendBlurble}
+          title="Send Blurble"
         />
       </View>
       <View style={styles.resultsView}>
         <ScrollView>
-          <Text>Open up App.tsx to start working on your app!</Text>
-          <Text style={{fontSize: 60}}>
-            Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do
-            eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad
-            minim veniam, quis nostrud exercitation ullamco laboris nisi ut
-            aliquip ex ea commodo consequat. Duis aute irure dolor in
-            reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla
-            pariatur. Excepteur sint occaecat cupidatat non proident, sunt in
-            culpa qui officia deserunt mollit anim id est laborum.
-          </Text>
+          {blurbles.map(function(item, index) {
+            return (
+              <Blurble 
+                key={index} 
+                id={item.id} 
+                title={item.title} 
+                content={item.content} 
+                datetime={item.datetime} 
+              />
+            )
+          })}
         </ScrollView>  
       </View>
       <StatusBar style="auto" />
@@ -49,36 +131,47 @@ export default function App() {
   );
 }
 
-const deviceWidth = Dimensions.get('window').width;
-const deviceHeight = Dimensions.get('window').height;
+export function Blurble(props: Blurble) {
+  return (
+    <View>
+      <Card>
+        <Card.Title>{props.title}</Card.Title>
+        <Card.Divider />
+        <Text>{props.content}</Text>
+        <Text>{props.datetime}</Text>
+      </Card>
+    </View>
+  );
+}
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#fff',
-    marginTop: deviceHeight * 0.1,
-    marginBottom: deviceHeight * 0.03,
-    marginLeft:  deviceWidth * 0.02,
-    marginRight: deviceWidth * 0.02,
+    marginTop: DEVICE_HEIGHT * 0.1,
+    marginBottom: DEVICE_HEIGHT * 0.03,
+    marginLeft:  DEVICE_WIDTH * 0.02,
+    marginRight: DEVICE_WIDTH * 0.02,
   },
   inputView: {
-    flex: 0.1,
-    backgroundColor: 'blue',
-    alignItems: 'flex-start',
+    flex: 0.2,
+    alignItems: 'stretch',
   },
   resultsView: {
-    flex: 0.9,
-    backgroundColor: 'red',
+    flex: 0.8,
   },
   titleInput: {
-    height: '40px',
-    width: 200,
-    fontSize: 30,
+    fontSize: 40,
     textAlign: 'left',
-    borderWidth: 1,
+  },
+  titleLabel: {
+    fontSize: 30,
   },
   contentInput: {
-    height: '40px',
+    flex: 1,
+    fontSize: 20,
+  },
+  contentLabel: {
     fontSize: 20,
   }
 });
