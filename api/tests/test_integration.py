@@ -12,6 +12,7 @@ def test_get(client):
 @pytest.mark.freeze_time("2023-03-14 15:09:26")
 def test_insert(client, app, current_date):
   
+  #payload
   data = {
     "title": "test note", 
     "content": "this is the content of the test note",
@@ -29,3 +30,14 @@ def test_insert(client, app, current_date):
 
     # check day time freezed with pytest freeze gun
     assert Blurb.query.first().datetime == current_date
+
+# test incorrect post
+def test_invalid_insert(client, app, current_date):
+  data = {
+    "name": "test note", 
+    "content": "this is the content of the test note",
+    "datetime": current_date
+  }
+
+  res = client.post("/insert", json=data)
+  assert res.status_code == 400
