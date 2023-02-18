@@ -1,13 +1,15 @@
 import os
+from types import NoneType
 import psycopg2
 import typing
 import json
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, Blueprint
 from flask_cors import CORS, cross_origin
 
-app = Flask(__name__)
-cors = CORS(app)
-app.config['CORS_HEADERS'] = 'Content-Type'
+from .models import Blurb
+from .extensions import db
+
+api = Blueprint("api", __name__)
 
 SELECT_QUERY = """
   SELECT * FROM diary_entries
@@ -44,54 +46,28 @@ def convert_row_to_object(row):
   Gets all entries from our database and returns them 
   back as a JSON string.
 """
-@app.route('/')
+@api.route('/')
 @cross_origin()
 def get_all_entries() -> str:
-  # Establish the connection and get the cursor.
-  connection = get_db_connection()
-  cursor: psycopg2.cursor = connection.cursor()
+  results: list[Blurb] = Blurb.query.all()
+  res = json.dumps(results, default = str)
+  return res
 
-  # Execute our query.
-  cursor.execute(SELECT_QUERY)
-
-  # Fetch the results of the query and store them in
-  # a variable. Note that cursor.fetchall() returns 
-  # results as a list of tuples.
-  # Documentation:
-  # https://www.psycopg.org/docs/cursor.html?highlight=fetchall#cursor.fetchall
-  tuple_results: list[tuple] = cursor.fetchall()
-
-  # Convert each tuple into an object.
-  results: list[dict] = list(map(convert_row_to_object, tuple_results))
-
-  # Close the cursor and connection.
-  cursor.close()
-  connection.close()
-
-  # If we don't know how to serialize a value,
-  # automatically seralize it as a string.
-  response = json.dumps(results, default=str)
-  return response
-
-@app.route('/insert', methods=['POST'])
+@api.route('/insert', methods=['POST'])
 @cross_origin()
 def insert_into_db() -> str:
-  # Get the the title and content from the request.
-  data: typing.Dict[str, str] = json.loads(request.data)
-  title: str = data['title']
-  content: str = data['content']
+  try:
+    data: typing.Dict[str, str] = json.loads(request.data)
+    title: str = data['title']
+    content: str = data['content']
+    datetime: str | NoneType = data['datetime']
 
-  # Establish the connection and get the cursor.
-  connection = get_db_connection()
-  cursor: psycopg2.cursor = connection.cursor()
+    blurb = Blurb(title=title, content=content, datetime=datetime)
+    
+    db.session.add(blurb)
+    db.session.commit()
+  
+  except Exception as e:
+    return 'bad request', 400
 
-  # Execute our query.
-  cursor.execute(INSERT_QUERY_START, (title, content))
-
-  # Commit the changes to the database.
-  connection.commit()
-
-  # Close the cursor and connection.
-  cursor.close()
-  connection.close()
   return 'Success'

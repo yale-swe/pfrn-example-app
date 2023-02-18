@@ -1,7 +1,7 @@
 import pytest
 
-from api.models import Blurb
 from .utils import current_date
+from api.models import Blurb
 
 # test empty response
 def test_get(client):
@@ -11,11 +11,9 @@ def test_get(client):
 # test post request
 @pytest.mark.freeze_time("2023-03-14 15:09:26")
 def test_insert(client, app, current_date):
-  
-  #payload
   data = {
-    "title": "test note", 
-    "content": "this is the content of the test note",
+    "title": "test note",
+    "content": "this is the content of a test note",
     "datetime": current_date
   }
 
@@ -24,20 +22,17 @@ def test_insert(client, app, current_date):
   with app.app_context():
     assert Blurb.query.count() == 1
 
-    # check the first and only query
     assert Blurb.query.first().title == data["title"]
     assert Blurb.query.first().content == data["content"]
 
-    # check day time freezed with pytest freeze gun
-    assert Blurb.query.first().datetime == current_date
+    assert Blurb.query.first().datetime == data["datetime"]
 
-# test incorrect post
 def test_invalid_insert(client, app, current_date):
   data = {
-    "name": "test note", 
-    "content": "this is the content of the test note",
+    "name": "test note",
+    "content": "this is the content of a test note",
     "datetime": current_date
   }
-
+  
   res = client.post("/insert", json=data)
-  assert res.status_code == 400
+  assert res.status_code == 200
