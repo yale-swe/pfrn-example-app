@@ -1,6 +1,8 @@
 import os
 import psycopg2
 
+from api import create_app, db
+
 
 def create_table():
   # Connects to our database using parameters stored 
@@ -47,4 +49,6 @@ def create_table():
   connection.close()
 
 if __name__ == '__main__':
-  create_table()
+  # create_table()
+  with app.app_context():
+    db.create_all()

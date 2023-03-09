@@ -1,9 +1,11 @@
 import os
 
 from flask import Flask
+from dotenv import load_dotenv
 
 from .extensions import db
 from .blurble_api import api
+from .config import Config
 
 def create_app(database_uri="postgresql://localhost:5432/{}".format(os.environ["DB_NAME"])):
   app = Flask(__name__)
@@ -14,5 +16,5 @@ def create_app(database_uri="postgresql://localhost:5432/{}".format(os.environ["
   db.init_app(app)
 
   app.register_blueprint(api)
-
+  
   return app
