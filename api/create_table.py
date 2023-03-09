@@ -1,6 +1,6 @@
 import os
 import psycopg2
-
+from dotenv import load_dotenv
 
 def create_table():
   # Connects to our database using parameters stored 
@@ -47,4 +47,5 @@ def create_table():
   connection.close()
 
 if __name__ == '__main__':
+  load_dotenv()
   create_table()
