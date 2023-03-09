@@ -6,15 +6,15 @@ from api import create_app, db
 def app():
   app = create_app()
 
+  # teardown
+  with app.app_context():
+    db.drop_all()
+    
   # setup
   with app.app_context():
     db.create_all()
 
   yield app
-
-  # teardown
-  with app.app_context():
-    db.drop_all()
 
 @pytest.fixture()
 def client(app):

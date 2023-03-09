@@ -17,4 +17,7 @@ def create_app(database_uri="postgresql://localhost:5432/{}".format(os.environ["
 
   app.register_blueprint(api)
   
+  with app.app_context():
+    db.create_all()
+
   return app
